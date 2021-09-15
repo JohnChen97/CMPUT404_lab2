@@ -2,11 +2,10 @@ import socket, sys, time
 from multiprocessing import Process
 
 
-def processing(connection, data):
-    #data = s2.recv(10240)
+def processing(connection, user_data, s2):
+    s2.sendall(user_data)
+    data = s2.recv(10240)
     connection.sendall(data)
-    #connection.shutdown(socket.SHUT_RDWR)
-    #connection.close()
 
 
 def handle_user_proxy():
@@ -60,15 +59,13 @@ if __name__ == '__main__':
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
                 s2.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 s2.connect((ip_address, net_PORT))
-                s2.sendall(user_data)
-                data = s2.recv(10240)
-                s2.shutdown(socket.SHUT_RDWR)
-                #connection.sendall(data)
 
                 p = Process(target=processing,
-                            args=(connection, data),
+                            args=(connection, user_data, s2),
                             daemon=True)
                 p.start()
-                #sys.stdout.write(data.decode() + '\n')
 
-        #s1.close()
+        s2.shutdown(socket.SHUT_RDWR)
+        s2.close()
+        s1.shutdown(socket.SHUT_RDWR)
+        s1.close()
