@@ -1,15 +1,18 @@
 import socket, sys, time
 from multiprocessing import Process
 
-def hand_proxy_network():
+
+def processing(connection, data):
+    #data = s2.recv(10240)
+    connection.sendall(data)
+    #connection.shutdown(socket.SHUT_RDWR)
+    #connection.close()
 
 
-
-def handle_user_proxy(address, connection, client_sent_data):
+def handle_user_proxy():
     data = connection.recv(10240)
-   
+
     connection.sendall(client_sent_data)
-    
 
 
 def proxy_network(HOST, POST):
@@ -32,20 +35,18 @@ def user_proxy(HOST, PORT):
     while True:
         connection, address = s1.accept()
         client_sent_data = proxy_network(data.decode(), 80)
-        p = Process(target = handle_user_proxy,
+        p = Process(target=handle_user_proxy,
                     args=(address, connection, client_sent_data),
                     daemon=True)
         p.start()
-        
 
 
 if __name__ == '__main__':
     #user_proxy('localhost', 8001)
 
-
-
     HOST = 'localhost'
     PORT = 8001
+    net_HOST = 'www.google.com'
     net_PORT = 80
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s1:
         s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -54,11 +55,20 @@ if __name__ == '__main__':
 
         while True:
             connection, address = s1.accept()
-            net_HOST = connection.recv(10240)
+            user_data = connection.recv(10240)
             ip_address = socket.gethostbyname(net_HOST)
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
                 s2.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 s2.connect((ip_address, net_PORT))
-                s2.sendall(net_HOST)
+                s2.sendall(user_data)
                 data = s2.recv(10240)
                 s2.shutdown(socket.SHUT_RDWR)
+                #connection.sendall(data)
+
+                p = Process(target=processing,
+                            args=(connection, data),
+                            daemon=True)
+                p.start()
+                #sys.stdout.write(data.decode() + '\n')
+
+        #s1.close()
