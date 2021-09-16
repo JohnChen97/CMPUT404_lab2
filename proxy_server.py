@@ -2,7 +2,8 @@ import socket, sys, time
 from multiprocessing import Process
 
 
-def processing(connection, user_data, s2):
+def processing(connection, s2):
+    user_data = connection.recv(10240)
     s2.sendall(user_data)
     data = s2.recv(10240)
     connection.sendall(data)
@@ -54,16 +55,17 @@ if __name__ == '__main__':
 
         while True:
             connection, address = s1.accept()
-            user_data = connection.recv(10240)
+            #user_data = connection.recv(10240)
             ip_address = socket.gethostbyname(net_HOST)
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
                 s2.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 s2.connect((ip_address, net_PORT))
 
                 p = Process(target=processing,
-                            args=(connection, user_data, s2),
+                            args=(connection, s2),
                             daemon=True)
                 p.start()
+                sys.stdout.write('Begin processing \n')
 
         s2.shutdown(socket.SHUT_RDWR)
         s2.close()
