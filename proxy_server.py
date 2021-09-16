@@ -7,6 +7,8 @@ def processing(connection, s2):
     s2.sendall(user_data)
     data = s2.recv(10240)
     connection.sendall(data)
+    s2.shutdown(socket.SHUT_RDWR)
+    s2.close()
 
 
 def handle_user_proxy():
@@ -67,7 +69,7 @@ if __name__ == '__main__':
                 p.start()
                 sys.stdout.write('Begin processing \n')
 
-        s2.shutdown(socket.SHUT_RDWR)
-        s2.close()
+        #s2.shutdown(socket.SHUT_RDWR)
+        #s2.close()
         s1.shutdown(socket.SHUT_RDWR)
         s1.close()
