@@ -9,6 +9,7 @@ def processing(connection, s2):
     connection.sendall(data)
     s2.shutdown(socket.SHUT_RDWR)
     s2.close()
+    sys.stdout.write('Finish processing.')
 
 
 def handle_user_proxy():
@@ -57,18 +58,20 @@ if __name__ == '__main__':
 
         while True:
             connection, address = s1.accept()
+            sys.stdout.write('Accepting connection from %s\n' % str(address))
             #user_data = connection.recv(10240)
             ip_address = socket.gethostbyname(net_HOST)
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
                 s2.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 s2.connect((ip_address, net_PORT))
-
+                sys.stdout.write('Connecting to web with ip address: %s\n' %
+                                 ip_address)
                 p = Process(target=processing,
                             args=(connection, s2),
                             daemon=True)
+
                 p.start()
                 sys.stdout.write('Begin processing \n')
-
         #s2.shutdown(socket.SHUT_RDWR)
         #s2.close()
         s1.shutdown(socket.SHUT_RDWR)

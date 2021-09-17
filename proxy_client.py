@@ -10,6 +10,7 @@ def client_connection(address):
     s.sendall(b'GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n')
     #s.shutdown(socket.SHUT_RDWR)
     data = s.recv(20480)
+    sys.stdout.write('Here is the data sent from the server:')
     sys.stdout.write('\n' + repr(data) + '\n')
     s.close()
 
